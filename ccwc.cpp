@@ -11,13 +11,12 @@ using namespace std;
 
 // Could have use an array of bool, map of option to index and map of index to option instead.
 // However, since this is small, a vector of pair is fine.
-vector<pair<string, bool> > isOptionsPresent;
-//  {
-//     {"-c", false},
-//     {"-l", false},
-//     {"-w", false},
-//     {"-m", false}
-// }
+vector<pair<const string, bool> > isOptionsPresent = {
+    {"-l", false},
+    {"-w", false},
+    {"-c", false},
+    {"-m", false}
+};
 
 struct FileData {
     long byteCount;
@@ -26,7 +25,7 @@ struct FileData {
     long charCount;
 };
 
-void processWordAndCharCountInLine(string& line, FileData& fileData) {
+void processWordAndByteCountInLine(string& line, FileData& fileData) {
     bool inWord = false;
     for (int i = 0; i < line.length(); i++) {
         fileData.byteCount += sizeof(line[i]);
@@ -45,6 +44,9 @@ void processWordAndCharCountInLine(string& line, FileData& fileData) {
     }
 }
 
+// Since this program supports multiple of options, we might need to read the file multiple times 
+// in order to get the relevant information. As io are quite slow, I have decided to retrieve all 
+// all the information at one go. 
 FileData getFileStats(istream& file) {
     FileData fileData;
 
@@ -53,7 +55,7 @@ FileData getFileStats(istream& file) {
         fileData.lineCount++;
         fileData.charCount += line.length();
         fileData.byteCount += 1; // for new line character
-        processWordAndCharCountInLine(line, fileData);
+        processWordAndByteCountInLine(line, fileData);
     }
 
     return fileData;
@@ -72,17 +74,18 @@ istream* getIstream(ifstream* fileInput, bool hasFileName, char* lastParam) {
 }
 
 void checkOptions(int argc, char** argv, bool hasFileName) {
+    bool hasAtLeastOneOption = false;
     for (int i = 1; i < argc - (hasFileName ? 1 : 0); i++) {
         char* option = argv[i];
         bool isOptionFound = false;
 
-        for (int j = 0; j < isOptionsPresent.size(); j++) {
-            pair<string, bool> isOptionPresent = isOptionsPresent[j];
+        for (auto& isOptionPresent: isOptionsPresent) {
             if (isOptionPresent.first != option) {
                 continue;
             }
 
             isOptionPresent.second = true;
+            hasAtLeastOneOption = true;
             isOptionFound = true;
             break;
         }
@@ -91,10 +94,51 @@ void checkOptions(int argc, char** argv, bool hasFileName) {
             throw InvalidOptionException(option);
         }
     }
+
+    if (hasAtLeastOneOption) {
+        return;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        isOptionsPresent[i].second = true;
+    }
+}
+
+void printOutput(FileData& fileData, bool hasFileName, char* lastParam) {
+    cout << " ";
+    for (auto& [option, isPresent]: isOptionsPresent) {
+        if (!isPresent) {
+            continue;
+        }
+        
+        // Will be using if else loops instead of switch statements since c++ does
+        // not support string based switch statements.
+        if (option == "-c") {
+            cout << "   " << fileData.byteCount;
+        } else if (option == "-l") {
+            cout << "   " << fileData.lineCount;
+        } else if (option == "-w") {
+            cout << "   " << fileData.wordCount;
+        } else if (option == "-m") {
+            cout << "   " << fileData.charCount;
+        }
+    }
+
+    if (hasFileName) {
+        cout << " " << lastParam;
+    }
+    cout << endl;
 }
 
 int main(int argc, char** argv) {
     bool hasFileName = argc > 1 && argv[argc - 1][0] != '-';
+    try {
+        checkOptions(argc, argv, hasFileName);
+    } catch (InvalidOptionException& e) {
+        cerr << "ccwc: illegal option -- " << e.getOption() << endl;
+        return 1;
+    }    
+    
     ifstream fileInput;
     istream* input;
     try {
@@ -104,20 +148,9 @@ int main(int argc, char** argv) {
             ": open: No such file or directory" << endl;
         return 1;
     }
-    
-
-    try {
-        checkOptions(argc, argv, hasFileName);
-    } catch (InvalidOptionException& e) {
-        cerr << "ccwc: illegal option -- " << e.getOption() << endl;
-        return 1;
-    }
 
     FileData fileData = getFileStats(*input);
-    cout << fileData.byteCount << endl;
-    cout << fileData.lineCount << endl;
-    cout << fileData.wordCount << endl;
-    cout << fileData.charCount << endl;
+    printOutput(fileData, hasFileName, argv[argc - 1]);
 
     if (hasFileName) {
         fileInput.close();
