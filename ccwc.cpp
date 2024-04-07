@@ -26,9 +26,10 @@ struct FileData {
     long charCount;
 };
 
-void processLineWordAndCharCount(string& line, FileData& fileData) {
+void processWordAndCharCountInLine(string& line, FileData& fileData) {
     bool inWord = false;
     for (int i = 0; i < line.length(); i++) {
+        fileData.byteCount += sizeof(line[i]);
         if (!isspace(line[i])) {
             inWord = true;
             continue;
@@ -47,13 +48,12 @@ void processLineWordAndCharCount(string& line, FileData& fileData) {
 FileData getFileStats(istream& file) {
     FileData fileData;
 
-    string line;
+    string line = "";
     while (getline(file, line)) {
         fileData.lineCount++;
-        fileData.byteCount += (line.length() * sizeof(char)) + 1;
         fileData.charCount += line.length();
-
-       processLineWordAndCharCount(line, fileData);
+        fileData.byteCount += 1; // for new line character
+        processWordAndCharCountInLine(line, fileData);
     }
 
     return fileData;
