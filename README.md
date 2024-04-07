@@ -67,4 +67,4 @@ Lastly, the program should support multiple options and order will be based on t
 ```
 
 # Testing
-This program will use `CppUnit` for testing. Refer to this [document](https://www.comp.nus.edu.sg/~cs3201/Tools-Lab/cppunit.html) for a quick guide on CppUnit.
+This program will use `doctest` for testing. Refer to [this](https://blog.jetbrains.com/rscpp/2019/07/10/better-ways-testing-with-doctest/) for a quick guide on doctest.
