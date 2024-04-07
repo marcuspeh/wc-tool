@@ -1,6 +1,20 @@
 # wc-tool
 This project is based on [challenge #1](https://codingchallenges.fyi/challenges/challenge-wc/) from [codingchallenges.fyi](https://codingchallenges.fyi/)
 
+# Running the project
+1) Compile the codes
+```
+g++ -o ccwc ccwc.cpp
+```
+2) Running the compiled codes
+```
+// With file input
+./ccwc sampleText/test.txt
+
+// With stdin
+cat sampleText/test.txt | ./ccwc
+```
+
 # Task
 Create my own version of the Unix command line tool wc.
 
