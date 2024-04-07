@@ -9,14 +9,6 @@
 
 using namespace std;
 
-// Could have use an array of bool, map of option to index and map of index to option instead.
-// However, since this is small, a vector of pair is fine.
-vector<pair<const string, bool> > isOptionsPresent = {
-    {"-l", false},
-    {"-w", false},
-    {"-c", false},
-    {"-m", false}
-};
 
 struct FileData {
     long byteCount;
@@ -73,7 +65,14 @@ istream* getIstream(ifstream* fileInput, bool hasFileName, char* lastParam) {
     return fileInput;
 }
 
-void checkOptions(int argc, char** argv, bool hasFileName) {
+vector<pair<const string, bool>> getIsOptionsPresentVector(int argc, char** argv, bool hasFileName) {
+    vector<pair<const string, bool>> isOptionsPresent = {
+        {"-l", false},
+        {"-w", false},
+        {"-c", false},
+        {"-m", false}
+    };
+
     bool hasAtLeastOneOption = false;
     for (int i = 1; i < argc - (hasFileName ? 1 : 0); i++) {
         char* option = argv[i];
@@ -96,15 +95,17 @@ void checkOptions(int argc, char** argv, bool hasFileName) {
     }
 
     if (hasAtLeastOneOption) {
-        return;
+        return isOptionsPresent;
     }
 
     for (int i = 0; i < 3; i++) {
         isOptionsPresent[i].second = true;
     }
+    return isOptionsPresent;
 }
 
-void printOutput(FileData& fileData, bool hasFileName, char* lastParam) {
+void printOutput(FileData& fileData, vector<pair<const string, bool>> isOptionsPresent, 
+        bool hasFileName, char* lastParam) {
     cout << " ";
     for (auto& [option, isPresent]: isOptionsPresent) {
         if (!isPresent) {
@@ -131,9 +132,12 @@ void printOutput(FileData& fileData, bool hasFileName, char* lastParam) {
 }
 
 int main(int argc, char** argv) {
+    // Could have use an array of bool, map of option to index and map of index to option instead.
+    // However, since this is small, a vector of pair is fine.
+    vector<pair<const string, bool>> isOptionsPresent;
     bool hasFileName = argc > 1 && argv[argc - 1][0] != '-';
     try {
-        checkOptions(argc, argv, hasFileName);
+        isOptionsPresent = getIsOptionsPresentVector(argc, argv, hasFileName);
     } catch (InvalidOptionException& e) {
         cerr << "ccwc: illegal option -- " << e.getOption() << endl;
         return 1;
@@ -150,7 +154,7 @@ int main(int argc, char** argv) {
     }
 
     FileData fileData = getFileStats(*input);
-    printOutput(fileData, hasFileName, argv[argc - 1]);
+    printOutput(fileData, isOptionsPresent, hasFileName, argv[argc - 1]);
 
     if (hasFileName) {
         fileInput.close();
