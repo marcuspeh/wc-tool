@@ -68,3 +68,12 @@ Lastly, the program should support multiple options and order will be based on t
 
 # Testing
 This program will use `doctest` for testing. Refer to [this](https://blog.jetbrains.com/rscpp/2019/07/10/better-ways-testing-with-doctest/) for a quick guide on doctest.
+
+I have placed the tests in a separate directory to make things clearer.
+
+Instructions to run:
+```
+cd test
+g++ -o test main.cpp
+./test
+```
