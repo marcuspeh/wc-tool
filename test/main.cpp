@@ -1,9 +1,9 @@
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
 
-#include "ccwc.test.cpp"
 #include "FileInputException.test.cpp"
 #include "InvalidOptionException.test.cpp"
+#include "Options.test.cpp"
 
 int main() {
     doctest::Context ctx;

@@ -3,19 +3,15 @@
 #include <utility>
 #include <string>
 #include <vector>
+#include <memory> 
 
 #include "FileInputException.cpp"
 #include "InvalidOptionException.cpp"
+#include "Options.cpp"
+#include "FileData.h"
 
 using namespace std;
 
-
-struct FileData {
-    long byteCount;
-    long lineCount;
-    long wordCount;
-    long charCount;
-};
 
 void processWordAndByteCountInLine(string& line, FileData& fileData) {
     bool inWord = false;
@@ -65,79 +61,14 @@ istream* getIstream(ifstream* fileInput, bool hasFileName, char* lastParam) {
     return fileInput;
 }
 
-vector<pair<const string, bool>> getIsOptionsPresentVector(int argc, char** argv, bool hasFileName) {
-    vector<pair<const string, bool>> isOptionsPresent = {
-        {"-l", false},
-        {"-w", false},
-        {"-c", false},
-        {"-m", false}
-    };
-
-    bool hasAtLeastOneOption = false;
-    for (int i = 1; i < argc - (hasFileName ? 1 : 0); i++) {
-        char* option = argv[i];
-        bool isOptionFound = false;
-
-        for (auto& isOptionPresent: isOptionsPresent) {
-            if (isOptionPresent.first != option) {
-                continue;
-            }
-
-            isOptionPresent.second = true;
-            hasAtLeastOneOption = true;
-            isOptionFound = true;
-            break;
-        }
-
-        if (!isOptionFound) {
-            throw InvalidOptionException(option);
-        }
-    }
-
-    if (hasAtLeastOneOption) {
-        return isOptionsPresent;
-    }
-
-    for (int i = 0; i < 3; i++) {
-        isOptionsPresent[i].second = true;
-    }
-    return isOptionsPresent;
-}
-
-void printOutput(FileData& fileData, vector<pair<const string, bool>> isOptionsPresent, 
-        bool hasFileName, char* lastParam) {
-    cout << " ";
-    for (auto& [option, isPresent]: isOptionsPresent) {
-        if (!isPresent) {
-            continue;
-        }
-        
-        // Will be using if else loops instead of switch statements since c++ does
-        // not support string based switch statements.
-        if (option == "-c") {
-            cout << "   " << fileData.byteCount;
-        } else if (option == "-l") {
-            cout << "   " << fileData.lineCount;
-        } else if (option == "-w") {
-            cout << "   " << fileData.wordCount;
-        } else if (option == "-m") {
-            cout << "   " << fileData.charCount;
-        }
-    }
-
-    if (hasFileName) {
-        cout << " " << lastParam;
-    }
-    cout << endl;
-}
 
 int main(int argc, char** argv) {
     // Could have use an array of bool, map of option to index and map of index to option instead.
     // However, since this is small, a vector of pair is fine.
-    vector<pair<const string, bool>> isOptionsPresent;
+    unique_ptr<Options> optionsPtr(nullptr);
     bool hasFileName = argc > 1 && argv[argc - 1][0] != '-';
     try {
-        isOptionsPresent = getIsOptionsPresentVector(argc, argv, hasFileName);
+        optionsPtr.reset(Options::getOptions(argc, argv, hasFileName));
     } catch (InvalidOptionException& e) {
         cerr << "ccwc: illegal option -- " << e.getOption() << endl;
         return 1;
@@ -154,7 +85,7 @@ int main(int argc, char** argv) {
     }
 
     FileData fileData = getFileStats(*input);
-    printOutput(fileData, isOptionsPresent, hasFileName, argv[argc - 1]);
+    optionsPtr->printOutput(fileData, hasFileName, argv[argc - 1]);
 
     if (hasFileName) {
         fileInput.close();
