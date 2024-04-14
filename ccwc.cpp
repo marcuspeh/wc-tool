@@ -63,11 +63,6 @@ istream* getIstream(ifstream* fileInput, bool hasFileName, char* lastParam) {
 
 
 int main(int argc, char** argv) {
-    if (argc == 1) {
-        cout << "Usage:./ccwc [-c] [-l] [-w] [-m] <file name>" << endl;
-        return 0;
-    }
-    
     unique_ptr<Options> optionsPtr(nullptr);
     bool hasFileName = argc > 1 && argv[argc - 1][0] != '-';
     try {

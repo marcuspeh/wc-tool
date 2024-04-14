@@ -4,7 +4,7 @@ This project is based on [challenge #1](https://codingchallenges.fyi/challenges/
 # Running the project
 1) Compile the codes
 ```
-g++ -o ccwc ccwc.cpp
+cmake CMakeLists.txt && make
 ```
 2) Running the compiled codes
 ```

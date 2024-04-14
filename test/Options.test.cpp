@@ -102,19 +102,53 @@ TEST_CASE("printOutput method") {
         } 
     }
 
-    SUBCASE("should print only filename") {
+    SUBCASE("should print default values with file name") {
         // Replace cout
         ostringstream oss;
         streambuf* p_cout_streambuf = cout.rdbuf();
         cout.rdbuf(oss.rdbuf());
 
-        // function
-        cout << "hello world\n";
+        int argc = 2;
+        char *argv[] = {(char*)"./test", (char*)"./test"};
+        bool hasFileName = true;
+        FileData fileData; 
+        fileData.byteCount = 123;
+        fileData.lineCount = 124;
+        fileData.wordCount = 125;
+        fileData.charCount = 126;
+
+        Options* options = Options::getOptions(argc, argv, hasFileName);
+        options->printOutput(fileData, hasFileName, argv[1]);
 
         // Restore cout
         cout.rdbuf(p_cout_streambuf);
 
         // test your oss content...
-        CHECK(oss.str() == "hello world\n");
+        CHECK(oss.str() == "    124   125   123 ./test\n");
+    }
+
+     SUBCASE("should print default values without file name") {
+        // Replace cout
+        ostringstream oss;
+        streambuf* p_cout_streambuf = cout.rdbuf();
+        cout.rdbuf(oss.rdbuf());
+
+        int argc = 1;
+        char *argv[] = {(char*)"./test"};
+        bool hasFileName = false;
+        FileData fileData; 
+        fileData.byteCount = 123;
+        fileData.lineCount = 124;
+        fileData.wordCount = 125;
+        fileData.charCount = 126;
+
+        Options* options = Options::getOptions(argc, argv, hasFileName);
+        options->printOutput(fileData, hasFileName, argv[0]);
+
+        // Restore cout
+        cout.rdbuf(p_cout_streambuf);
+
+        // test your oss content...
+        CHECK(oss.str() == "    124   125   123\n");
     }
 }
