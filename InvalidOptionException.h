@@ -2,6 +2,9 @@
 
 using namespace std;
 
+#include <exception>
+
+
 class InvalidOptionException : public exception {
     char* option;
 

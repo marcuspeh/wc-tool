@@ -5,9 +5,9 @@
 #include <vector>
 #include <memory> 
 
-#include "FileInputException.cpp"
-#include "InvalidOptionException.cpp"
-#include "Options.cpp"
+#include "FileInputException.h"
+#include "InvalidOptionException.h"
+#include "Options.h"
 #include "FileData.h"
 
 using namespace std;
@@ -63,8 +63,11 @@ istream* getIstream(ifstream* fileInput, bool hasFileName, char* lastParam) {
 
 
 int main(int argc, char** argv) {
-    // Could have use an array of bool, map of option to index and map of index to option instead.
-    // However, since this is small, a vector of pair is fine.
+    if (argc == 1) {
+        cout << "Usage:./ccwc [-c] [-l] [-w] [-m] <file name>" << endl;
+        return 0;
+    }
+    
     unique_ptr<Options> optionsPtr(nullptr);
     bool hasFileName = argc > 1 && argv[argc - 1][0] != '-';
     try {

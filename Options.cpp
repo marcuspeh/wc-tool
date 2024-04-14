@@ -1,9 +1,13 @@
+#include <iostream>
+
 #include "Options.h"
 #include "InvalidOptionException.h"
 
 Options::Options() {}
 
 void Options::setDefault() {
+    // Could have use an array of bool, map of option to index and map of index to option instead.
+    // However, since this is small, a vector of pair is fine.
     unordered_map<string, bool> defaultIsPresent {
         {byteFlag, true},
         {lineFlag, true},
